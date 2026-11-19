@@ -1,58 +1,187 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# ◈ DriftLens
 
-## About Laravel
+### See your infrastructure. Understand what changed.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**A Linux server visibility and configuration-drift platform — built with Laravel and Python.**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<br />
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+![Project Status](https://img.shields.io/badge/status-in%20development-8b5cf6?style=for-the-badge)
+![Platform](https://img.shields.io/badge/platform-Linux-64748b?style=for-the-badge&logo=linux&logoColor=white)
+![Backend](https://img.shields.io/badge/backend-Laravel-f43f5e?style=for-the-badge&logo=laravel&logoColor=white)
+![Language](https://img.shields.io/badge/agent-Python-3776ab?style=for-the-badge&logo=python&logoColor=white)
 
-## Learning Laravel
+<br />
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+*One place to see your servers, their reported state, and the changes that deserve your attention.*
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+</div>
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## The idea
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Managing several Linux servers often means jumping between SSH sessions, commands, and configuration files just to answer simple questions: **What is running? What changed? Is this server still configured the way I expect?**
 
-```bash
-composer require laravel/boost --dev
+**DriftLens aims to bring that information together.** A lightweight agent on each monitored machine will collect selected system information and send it to a central Laravel application. From one dashboard, users will be able to review server inventory, inspect reported state over time, and identify differences between the expected and actual configuration of a machine.
 
-php artisan boost:install
+> The goal is not to replace SSH or established monitoring tools. It is to provide a clear overview of server state and make configuration changes easier to spot.
+
+## At a glance
+
+| | |
+|---|---|
+| **Project type** | Web application + Linux agent |
+| **Primary focus** | Server inventory, system visibility, configuration drift |
+| **Backend** | PHP · Laravel |
+| **Collection agent** | Python · Linux |
+| **Data storage** | PostgreSQL (planned) |
+| **Deployment** | Docker (planned) |
+| **Project status** | Early development |
+
+## How it is intended to work
+
+DriftLens is being designed around three parts: a central web application, a small agent installed on monitored Linux servers, and a comparison layer that checks reported state against user-defined expectations.
+
+```mermaid
+flowchart LR
+    subgraph SERVERS[Monitored Linux servers]
+        A1[Server A]
+        A2[Server B]
+        A3[Server C]
+        AG[Python agent]
+        A1 --> AG
+        A2 --> AG
+        A3 --> AG
+    end
+
+    AG -->|Authenticated reports| API[Laravel API]
+    API --> APP[DriftLens application]
+    APP <--> DB[(Database)]
+    POLICY[Expected configuration] --> ENGINE[Drift comparison]
+    DB --> ENGINE
+    ENGINE --> ALERTS[Changes & warnings]
+    APP --> UI[Web dashboard]
+    ALERTS --> UI
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+*This diagram represents the target architecture; components are being developed incrementally.*
 
-## Contributing
+## What DriftLens aims to provide
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 🖥️ Server inventory
+A central place to register servers and review basic information such as hostname, operating system, and last report time.
 
-## Code of Conduct
+### 📊 System visibility
+Readable reports covering selected resource and system information, including CPU and memory usage, disk space, running services, listening ports, and Docker containers where available.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 🐍 Lightweight collection agent
+A Python agent that gathers a defined set of information locally and sends structured reports to the application through an authenticated API.
 
-## Security Vulnerabilities
+### 🔎 Configuration drift detection
+Compare the state reported by a server with configuration rules defined in DriftLens. For example, identify an unexpected listening port, a stopped service, or a container that is no longer running.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 🕓 Report history
+Keep previous reports so users can review how a server's reported state changes over time.
 
-## License
+### 🔔 Warnings and alerts
+Make noteworthy differences visible instead of requiring users to manually compare system output.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+> These are planned capabilities, not a claim that every feature is already implemented.
+
+## Technology direction
+
+| Technology | Intended role |
+|---|---|
+| **PHP / Laravel** | Web application, API, authentication, and application logic |
+| **Python** | Lightweight Linux data-collection agent |
+| **PostgreSQL** | Persistent storage for servers, reports, and configuration rules |
+| **Linux** | Operating environment for monitored machines and the agent |
+| **Docker / Compose** | Reproducible development and deployment environment |
+| **Git / GitHub** | Version control and project collaboration |
+
+The stack may evolve as the project develops. The first priority is to build a working end-to-end flow before adding more infrastructure.
+
+## Development roadmap
+
+The project is intentionally being built in stages. The checklist below reflects the current direction, not a promise that every item is complete.
+
+- [x] Initialize the Laravel application and local Git repository
+- [ ] Build server registration and inventory management
+- [ ] Design the database for servers and incoming reports
+- [ ] Create an authenticated API endpoint for server reports
+- [ ] Build the first Python collector and JSON report format
+- [ ] Send a report from a Linux machine to DriftLens
+- [ ] Display server information and report history in the dashboard
+- [ ] Define expected configuration rules
+- [ ] Detect and display configuration drift
+- [ ] Containerize the application and document deployment
+- [ ] Add automated checks and improve operational visibility
+
+## Getting started
+
+DriftLens is at an early stage. The Laravel application has been initialized, but the server-management features and Python agent are still on the roadmap.
+
+### Prerequisites
+
+- PHP and Composer, with the PHP extensions required by the Laravel application
+- Node.js and npm
+- Git
+- A supported database configured for the application
+
+### Run the Laravel application locally
+
+```bash
+# Clone the repository
+git clone git@github.com:YOUR_USERNAME/driftlens.git
+cd driftlens
+
+# Install PHP dependencies
+composer install
+
+# Create your local environment file
+cp .env.example .env
+
+# Generate the Laravel application key
+php artisan key:generate
+```
+
+Configure the database connection in `.env` before running migrations. For PostgreSQL, set `DB_CONNECTION=pgsql` and provide the relevant database name, username, password, host, and port. Make sure the matching PHP database extension is installed.
+
+```bash
+# Create / update the database schema
+php artisan migrate
+
+# Install frontend dependencies and build assets
+npm install
+npm run build
+
+# Start the local development environment
+composer run dev
+```
+
+The application should then be available at the local URL printed by Laravel's development server (commonly `http://localhost:8000`).
+
+## Design principles
+
+- **Visibility first:** show useful, understandable information rather than overwhelming users with raw system output.
+- **Small agent, clear contract:** keep collection focused and send structured reports through a documented API.
+- **Secure by design:** authenticate agent reports, protect credentials, and use least-privilege access.
+- **No surprise automation:** begin with detection and explanation; any future server-side actions must be deliberate and safely controlled.
+- **Build in verifiable steps:** test the full path from a monitored machine to the dashboard before expanding the feature set.
+
+## Project status
+
+DriftLens is an actively developed personal university and portfolio project. The architecture and feature set will become more concrete as each stage is implemented. Documentation will be updated alongside working functionality.
+
+---
+
+<div align="center">
+
+**DriftLens** · From server state to a clearer picture of your infrastructure.
+
+<sub>Built step by step. Designed for Linux. Focused on the details that change.</sub>
+
+</div>
